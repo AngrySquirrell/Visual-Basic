@@ -85,26 +85,10 @@ Sub Main_Stripe()
 
 '
 
-Dim i&, i2&, order_id, order_id2, t, var, main
+Dim i&, i2&, i°&, i§, order_id&, order_id2$, t, var, main
 Dim d, d2, listCountry, net, sum, checksum
 
-i = 2
-main = "Ventes 2022"
-
-
-    'Check every lines")
-    Do Until IsEmpty(Cells(i, 1)) = True
-    
-        Sheets("Stripe Opérations").Select
-    
-        MsgBox ("Attribution de toutes les variables")
-        d = Cells(i, 8).Value2
-        d = Format(d, "mm/dd/yyyy")
-        d2 = CDate(Feuil9.Cells(2, 1).Value2)
-        d2 = Format(d2, "mm/dd/yyyy")
-        order_id = Cells(i, 4).Value
-        order_id2 = Cells(i, 5).Value
-        listCountry = Array( _
+listCountry = Array( _
         "AD", "AL", "AM", "AT", "AX", _
         "AZ", "BA", "BE", "BG", "BY", _
         "CH", "CY", "CZ", "DE", "DK", _
@@ -118,15 +102,35 @@ main = "Ventes 2022"
         "SI", "SJ", "SK", "SM", "TR", _
         "UA", "VA" _
         )
+
+i = 2
+main = "Ventes 2022"
+sum = 0
+
+
+    'Check every lines
+    Do Until IsEmpty(Cells(i, 1)) = True
+    
+        Sheets("Stripe Opérations").Select
+    
+        'Attribution de toutes les variables
         
-        MsgBox (ifExist(order_id2) & " | " & order_id2)
-        MsgBox (Format(d, "yyyy") & Format(d2, "yyyy"))
+        d = Cells(i, 8).Value2
+        d = Format(d, "mm/dd/yyyy")
+        d2 = CDate(Feuil9.Cells(2, 1).Value2)
+        d2 = Format(d2, "mm/dd/yyyy")
+        
+        order_id = Cells(i, 4).Value
+        order_id2 = Cells(i, 5).Value
+        
+        'MsgBox (ifExist(order_id2) & " | " & order_id2)
+        'MsgBox (Format(d, "yyyy") & Format(d2, "yyyy"))
                 
         'Vérifie que la ligne n'existe pas déjà dans 'Vente 2022'
                 'Si = False alors la ligne N'EXISTE PAS, sinon MsgBox
-        If ifExist(order_id2) = False And Format(d, "yyyy") = Format(d2, "yyyy") Then
+        If ifExist(order_id2) = False And Format(d, "yyyy") = Format(d2, "yyyy") And ifExist(order_id) = True Then
         
-            MsgBox ("THEN initiated")
+            'MsgBox ("THEN initiated")
         
         'Check type to be 'Charge' - " & Cells(i, 16).Value)
             If Cells(i, 16).Value = "charge" Then
@@ -145,78 +149,80 @@ main = "Ventes 2022"
             'Change de Sheet")
                 Sheets(main).Select
             
-            'Filtre par la date du Refund")
-                ActiveSheet.Range("$A$1:$AB$12569").AutoFilter Field:=1, Criteria1:=Array( _
-                "="), Operator:=xlFilterValues, Criteria2:=Array(2, d)
-                Cells(1, 1).Select
+                'Filtre par la date du Refund")
+                    ActiveSheet.Range("$A$1:$AB$12569").AutoFilter Field:=1, Criteria1:=Array( _
+                    "="), Operator:=xlFilterValues, Criteria2:=Array(2, d)
+                    Cells(1, 1).Select
             
-            'Insert une nouvelle ligne à la fin")
-                Selection.End(xlDown).Offset(1, 0).Select
-                Selection.EntireRow.Insert
+                'Insert une nouvelle ligne à la fin")
+                    Selection.End(xlDown).Offset(1, 0).Select
+                    Selection.EntireRow.Insert
             
-            'Récupère le numéro de la ligne créée")
-                i2 = ActiveCell.Row
+                'Récupère le numéro de la ligne créée")
+                    i2 = ActiveCell.Row
             
-            'Supprime le filtre")
-                ActiveSheet.Range("$A$1:$AB$12568").AutoFilter Field:=1
+                'Supprime le filtre")
+                    ActiveSheet.Range("$A$1:$AB$12568").AutoFilter Field:=1
             
-            'Cherche la case avec le n° de commande")
-                Cells.Find(What:=order_id, LookIn:=xlValues, LookAt:=xlPart).Activate
-    
-            'Copie/Colle la ligne trouvée dans celle fraîchement créée")
-                ActiveCell.EntireRow.Copy Selection.End(xlDown).Offset(1, 0).EntireRow
+                'Cherche la case avec le n° de commande")
+                    Cells.Find(What:=order_id, LookIn:=xlValues, LookAt:=xlPart).Activate
+            
+            
+                'Copie/Colle la ligne trouvée dans celle fraîchement créée")
+                    ActiveCell.EntireRow.Copy
+                    Selection.End(xlDown).Offset(1, 0).EntireRow.PasteSpecial xlPasteValues
                 
-            'Coloration de la ligne fraîchement créée pour ajouter un peu de joie dans nos coeurs")
-                Cells(i2, 1).EntireRow.Interior.ColorIndex = 17
+                'Coloration de la ligne fraîchement créée pour ajouter un peu de joie dans nos coeurs")
+                    Cells(i2, 1).EntireRow.Interior.ColorIndex = 17
             
-            'Date (A)")
-                Cells(i2, 1).Value2 = CDate(Format(d, "dd/mm/yyyy"))
+                'Date (A)")
+                    Cells(i2, 1).Value2 = CDate(Format(d, "dd/mm/yyyy"))
             
-            'Numéro de commande (B)
-                Cells(i2, 2).Value = order_id & "bis"
+                'Numéro de commande (B)
+                    Cells(i2, 2).Value = order_id & "bis"
             
-            'Total HT (I)
-                Sheets("Stripe").Select
-                var = Cells(i, 13).Value
-                Sheets(main).Select
-                Cells(i2, 9).Value = var / 1.2                                      ' I = TTC(I) / 1.2
+                'Total HT (I)
+                    Sheets("Stripe").Select
+                    var = Cells(i, 13).Value
+                    Sheets(main).Select
+                    Cells(i2, 9).Value = var / 1.2                                      ' I = TTC(I) / 1.2
             
-            'Total TVA (J)
-                Cells(i2, 10).Value = var * (1 / 6)                                 ' J = I * 1/6
+                'Total TVA (J)
+                    Cells(i2, 10).Value = var * (1 / 6)                                 ' J = I * 1/6
             
-            'Total TTC (K)
-                Cells(i2, 11).Value = var                                           ' K = TTC(I)
+                'Total TTC (K)
+                    Cells(i2, 11).Value = var                                           ' K = TTC(I)
             
-            'Expéditions (L->N)
-                Cells(i2, 12).Value = 0                                             ' L = 0
-                Cells(i2, 13).Value = 0                                             ' M = 0
-                Cells(i2, 14).Value = 0                                             ' N = 0
+                'Expéditions (L->N)
+                    Cells(i2, 12).Value = 0                                             ' L = 0
+                    Cells(i2, 13).Value = 0                                             ' M = 0
+                    Cells(i2, 14).Value = 0                                             ' N = 0
             
-            'Total HT (O)
-                Cells(i2, 15).Value = var / 1.2                                     ' O = I
+                'Total HT (O)
+                    Cells(i2, 15).Value = var / 1.2                                     ' O = I
             
-            'Total TTC (P)
-                Cells(i2, 16).Value = var                                           ' P = TTC(I)
+                'Total TTC (P)
+                    Cells(i2, 16).Value = var                                           ' P = TTC(I)
             
-            'Commissions (Q->S)
-                Cells(i2, 17).Value = 0                                             ' Q = 0
-                Cells(i2, 18).Value = 0                                             ' R = 0
-                Cells(i2, 19).Value = 0                                             ' S = 0
+                'Commissions (Q->S)
+                    Cells(i2, 17).Value = 0                                             ' Q = 0
+                    Cells(i2, 18).Value = 0                                             ' R = 0
+                    Cells(i2, 19).Value = 0                                             ' S = 0
             
-            'Montant versé après commissions (T)
-                Cells(i2, 20).Value = var                                           ' T = TTC(I)
+                'Montant versé après commissions (T)
+                    Cells(i2, 20).Value = var                                           ' T = TTC(I)
                 
-            'Date du virement(G)
-                var = Feuil14.Cells(i, 2).Value
-                Cells(i2, 7).Value = var                                            ' G = Date(B)
+                'Date du virement(G)
+                    var = Feuil14.Cells(i, 2).Value
+                    Cells(i2, 7).Value = var                                            ' G = Date(B)
             
-            'Montant du virement (H)
-                var = Feuil14.Cells(i, 6).Value
-                Cells(i2, 8).Value = var                                            ' H = F
+                'Montant du virement (H)
+                    var = Feuil14.Cells(i, 6).Value
+                    Cells(i2, 8).Value = var                                            ' H = F
                 
             End If
             
-            MsgBox ("Commande non trouvée sur 'Ventes 2022' :  " & order_id)
+            MsgBox ("Commande non trouvée sur 'Ventes 2022' :  " & order_id & " | Possible si en début d'année, si achat de l'an dernier est remboursé cette année)")
             
             Sheets("Stripe Opérations").Select
         
@@ -245,21 +251,42 @@ main = "Ventes 2022"
         End If
         
         'Fait la somme des opérations
-        sum = sum + Feuil14.Cells(i, 15)
+        'sum = sum + Val(Feuil14.Cells(i, 15).Value)
+        'MsgBox (sum)
         
         i = i + 1
     Loop
     
-    'Fait la somme de tout les virements")
-    checksum = Feuil13.Cells(2, 7).Value + Feuil13.Cells(3, 7).Value + Feuil13.Cells(4, 7).Value + Feuil13.Cells(5, 7).Value + Feuil13.Cells(6, 7).Value
     
-    'Vérifie si la différence entre les virements et les reçus est inférieure ou égale à 1.5€")
-    MsgBox ("Sum : " & sum & "  -  Checksum : " & checksum)
-    If Abs(sum - checksum) >= 1.5 Then
-        MsgBox ("Erreur de checksum, la somme des virement reçue est différent du montant annoncé : " + sum + " =/= " + checksum)
-    Else
-        MsgBox ("La sum et checksum semblent être bon : " & sum & " <> " & checksum)
-    End If
+    
+    
+    Sheets("Stripe Opérations").Select
+    i° = 2
+    i§ = 2
+    Do Until IsEmpty(Cells(i°, 1)) = True
+    
+    checksum = Val(Cells(i°, 6).Value)
+    MsgBox (Cells(i°, 6).Value & " - " & Cells(i°, 6).Offset(1, 0).Value)
+    
+        If Cells(i°, 6).Value = Cells(i°, 6).Offset(1, 0).Value Then
+        
+            sum = sum + Val(Feuil14.Cells(i°, 15))
+            MsgBox (checksum & "    -    " & sum)
+            
+        Else
+            MsgBox (Abs(sum - checksum))
+            If Abs(sum - checksum) >= 5 Then
+                MsgBox ("Erreur de checksum, la somme des virement reçue est différent du montant annoncé : " & sum & " <> " & checksum)
+            Else
+                MsgBox ("La sum et checksum semblent être égaux : " & sum & " <> " & checksum)
+            End If
+            
+            sum = 0
+        End If
+    
+    i° = i° + 1
+    
+    Loop
     
 End Sub
 Sub Create_Paypal()
@@ -312,7 +339,7 @@ Sub Create_Paypal()
     Range("J1").Select
     ActiveCell.EntireRow.Interior.ColorIndex = 36
     ActiveCell.FormulaR1C1 = _
-        "=IF(LEFT(RC[11],3)=""PRM"",RIGHT(RC[11],5),""NULL"")"
+        "=IF(LEFT(RC[12],3)=""PRM"",RIGHT(RC[12],5),""NULL"")"
     Selection.AutoFill Destination:=Range("J1:J13"), Type:=xlFillDefault
     'Etend la 2nd formule
     Selection.AutoFill Destination:=Range("J1:J1000"), Type:=xlFillDefault
